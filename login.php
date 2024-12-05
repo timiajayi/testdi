@@ -48,7 +48,7 @@ function authenticate($username, $password) {
         }
     }
 
-    ldap_unbind($ldap_conn); // Unbind connection after attempt
+    // ldap_unbind($ldap_conn); // Unbind connection after attempt
     return false;
 }
 
