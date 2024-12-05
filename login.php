@@ -1,7 +1,7 @@
 <?php
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-
+ini_set('memory_limit', '256M');
 session_start();
 require_once 'config/ldap.php';
 
@@ -14,7 +14,7 @@ function authenticate($username, $password) {
     }
     
     // LDAP authentication
-    $ldap_conn = ldap_connect(LDAP_HOST, LDAP_PORT);
+    $ldap_conn = ldap_connect('ldaps://10.10.15.50:389');  // LDAPS port
     
     if (!$ldap_conn) {
         die("Could not connect to LDAP server at " . LDAP_HOST);
