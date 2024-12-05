@@ -309,40 +309,41 @@ require_once 'auth.php';
 
 
 
-        document.getElementById('idCardForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            document.getElementById('loader').style.display = 'block';
-            
-            const formData = new FormData(this);
-            
-            try {
-                const response = await fetch('generate.php', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    const basePath = window.location.href.replace('index.html', '');
-                    const frontImagePath = basePath + data.front_image;
-                    const backImagePath = basePath + data.back_image;
-
-                    document.getElementById('frontPreview').src = frontImagePath;
-                    document.getElementById('backPreview').src = backImagePath;
-                    
-                    document.getElementById('downloadButtons').innerHTML = `
-                        <a href="${frontImagePath}" download class="download-btn">Download Front</a>
-                        <a href="${backImagePath}" download class="download-btn">Download Back</a>
-                    `;
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            } finally {
-                document.getElementById('loader').style.display = 'none';
-            }
+document.getElementById('idCardForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    document.getElementById('loader').style.display = 'block';
+    
+    const formData = new FormData(this);
+    
+    try {
+        const response = await fetch('generate.php', {
+            method: 'POST',
+            body: formData
         });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const basePath = window.location.origin; // This will get the base URL like "http://10.100.11.151"
+            const frontImagePath = basePath + '/' + data.front_image;
+            const backImagePath = basePath + '/' + data.back_image;
+
+            document.getElementById('frontPreview').src = frontImagePath;
+            document.getElementById('backPreview').src = backImagePath;
+            
+            document.getElementById('downloadButtons').innerHTML = `
+                <a href="${frontImagePath}" download class="download-btn">Download Front</a>
+                <a href="${backImagePath}" download class="download-btn">Download Back</a>
+            `;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        document.getElementById('loader').style.display = 'none';
+    }
+});
+
 
         async function generateQR() {
     const content = document.getElementById('qrContent').value;
