@@ -15,10 +15,11 @@
             text-align: center;
             margin-bottom: 30px;
         }
+        
 
         .company-logo {
             max-width: 200px;
-            height: auto;
+            max-height: 100px;
         }
 
         .form-container {
@@ -160,6 +161,10 @@
 </head>
 <body>
     <div class="form-container">
+        <div class="company-header">
+            <img src="./templates/logo.png" alt="Company Logo" class="company-logo">
+            <h1>ID Card Generator</h1>
+        </div>
         <form method="post" action="login.php">
             <div class="form-group">
                 <label>Username</label>

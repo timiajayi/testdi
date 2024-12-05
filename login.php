@@ -12,7 +12,7 @@ function authenticate($username, $password) {
     
     // LDAP authentication
     $ldap_conn = ldap_connect(LDAP_HOST, LDAP_PORT);
-    ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
+    ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 2);
     
     $ldap_bind = @ldap_bind($ldap_conn, "uid=$username," . LDAP_DN, $password);
     
@@ -22,6 +22,7 @@ function authenticate($username, $password) {
         return true;
     }
     return false;
+    
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -14,6 +14,7 @@ require_once 'auth.php';
             padding: 20px;
             background-color: #f5f5f5;
         }
+        
 
         .company-header {
             text-align: center;
@@ -22,7 +23,7 @@ require_once 'auth.php';
 
         .company-logo {
             max-width: 200px;
-            height: auto;
+            max-height: 100px;
         }
 
         .form-container {
@@ -164,7 +165,7 @@ require_once 'auth.php';
 </head>
 <body>
     <div class="company-header">
-        <img src="company-logo.png" alt="Company Logo" class="company-logo">
+        <img src="./templates/logo.png" alt="Company Logo" class="company-logo">
         <h1>ID Card Generator</h1>
     </div>
 
