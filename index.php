@@ -15,7 +15,7 @@
             text-align: center;
             margin-bottom: 30px;
         }
-        
+
 
         .company-logo {
             max-width: 200px;
@@ -165,6 +165,7 @@
             <img src="./templates/logo.png" alt="Company Logo" class="company-logo">
             <h1>ID Card Generator</h1>
         </div>
+        <?php if (isset($error)) { echo "<p style='color: red;'>$error</p>"; } ?>
         <form method="post" action="login.php">
             <div class="form-group">
                 <label>Username</label>
