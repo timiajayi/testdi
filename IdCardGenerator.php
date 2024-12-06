@@ -105,7 +105,7 @@ class IdCardGenerator {
         if (!empty($data['id_number'])) {
             $text_color = imagecolorallocate($template, 0, 0, 0);
             // imagettftext($template, 36, 90, 550, 350, $text_color, $this->font_path_bold, $data['id_number']);
-            $this->wrapText($template, $data['id_number'], $this->font_path_bold, 60, $text_color, 550, 250, 150, 90);
+            $this->wrapText($template, $data['id_number'], $this->font_path_bold, 60, $text_color, 550, 300, 150, 90);
         }
         
         // Add QR code if provided with specific positioning
