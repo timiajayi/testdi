@@ -1,0 +1,17 @@
+# Log files
+id_card_errors.log
+
+# Generated files
+# generated/
+# qrcodes/
+
+# Vendor dependencies
+vendor/
+
+# IDE files
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
