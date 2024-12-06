@@ -525,3 +525,12 @@
 [03-Dec-2024 10:04:31 Europe/Berlin] PHP Deprecated:  Implicit conversion from float 171.26 to int loses precision in D:\xampp\htdocs\pop2024\IdCardGenerator.php on line 126
 [03-Dec-2024 10:04:31 Europe/Berlin] PHP Deprecated:  Implicit conversion from float 136.5 to int loses precision in D:\xampp\htdocs\pop2024\IdCardGenerator.php on line 116
 [03-Dec-2024 10:04:31 Europe/Berlin] ID card generated successfully: oluwatimilehin_ajayi_20241203_100431
+[06-Dec-2024 09:45:58 Europe/Berlin] Processing ID card for: oluwatimilehin ajayi
+[06-Dec-2024 09:45:58 Europe/Berlin] PHP Deprecated:  Implicit conversion from float 153.5 to int loses precision in C:\xampp\htdocs\testdi\IdCardGenerator.php on line 177
+[06-Dec-2024 09:45:58 Europe/Berlin] PHP Deprecated:  Implicit conversion from float 153.5 to int loses precision in C:\xampp\htdocs\testdi\IdCardGenerator.php on line 177
+[06-Dec-2024 09:45:58 Europe/Berlin] PHP Deprecated:  Implicit conversion from float 153.5 to int loses precision in C:\xampp\htdocs\testdi\IdCardGenerator.php on line 184
+[06-Dec-2024 09:45:58 Europe/Berlin] PHP Deprecated:  Implicit conversion from float 153.5 to int loses precision in C:\xampp\htdocs\testdi\IdCardGenerator.php on line 184
+[06-Dec-2024 09:45:58 Europe/Berlin] PHP Deprecated:  Implicit conversion from float 171.26 to int loses precision in C:\xampp\htdocs\testdi\IdCardGenerator.php on line 126
+[06-Dec-2024 09:45:58 Europe/Berlin] PHP Deprecated:  Implicit conversion from float 178.5 to int loses precision in C:\xampp\htdocs\testdi\IdCardGenerator.php on line 116
+[06-Dec-2024 09:45:58 Europe/Berlin] PHP Deprecated:  Implicit conversion from float 136.5 to int loses precision in C:\xampp\htdocs\testdi\IdCardGenerator.php on line 116
+[06-Dec-2024 09:45:59 Europe/Berlin] ID card generated successfully: oluwatimilehin_ajayi_20241206_094558

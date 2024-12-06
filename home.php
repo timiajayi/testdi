@@ -161,6 +161,25 @@ require_once 'auth.php';
             background: #5a6268;
         }
 
+        .qr-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .qr-fields label {
+            margin-top: 10px;
+        }
+
+        .qr-fields input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+
     </style>
 </head>
 <body>
@@ -210,13 +229,58 @@ require_once 'auth.php';
                 <label>QR Code Image (Optional)</label>
                 <input type="file" name="qr_code" accept="image/*">
             </div>
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label>Generate QR Code Content (Optional)</label>
                 <textarea id="qrContent" placeholder="Enter content for QR code generation"></textarea>
                 <button type="button" onclick="generateQR()" class="secondary-btn" style="margin-top: 10px;">Generate QR Code</button>
                 <div id="qrPreview" style="margin-top: 10px; text-align: center;"></div>
-            </div>
-            
+            </div> -->
+            <div class="form-group">
+    <h3>Contact Information for QR Code</h3>
+    <div class="qr-fields">
+        <label>First Name:</label>
+        <input type="text" id="firstName" placeholder="First Name">
+        
+        <label>Last Name:</label>
+        <input type="text" id="lastName" placeholder="Last Name">
+        
+        <label>Company:</label>
+        <input type="text" id="company" placeholder="Company/Organization">
+        
+        <label>Job Title:</label>
+        <input type="text" id="jobTitle" placeholder="Job Title">
+        
+        <label>Mobile:</label>
+        <input type="text" id="mobile" placeholder="Mobile Number">
+        
+        <label>Phone:</label>
+        <input type="text" id="phone" placeholder="Phone Number">
+        
+        <label>Email:</label>
+        <input type="email" id="email" placeholder="Email Address">
+        
+        <label>Website:</label>
+        <input type="url" id="website" placeholder="Website URL">
+        
+        <label>Address:</label>
+        <input type="text" id="street" placeholder="Street Address">
+        
+        <label>City:</label>
+        <input type="text" id="city" placeholder="City">
+        
+        <label>State:</label>
+        <input type="text" id="state" placeholder="State">
+        
+        <label>Country:</label>
+        <input type="text" id="country" placeholder="Country">
+        
+        <label>Birthday:</label>
+        <input type="date" id="birthday" placeholder="Birthday">
+    </div>
+    <button type="button" onclick="generateContactQR()" class="secondary-btn">Generate Contact QR Code</button>
+    <div id="qrPreview" style="margin-top: 10px; text-align: center;"></div>
+</div>
+
             
 
             <button type="submit">Generate ID Card</button>
@@ -345,38 +409,104 @@ document.getElementById('idCardForm').addEventListener('submit', async function(
 });
 
 
-        async function generateQR() {
-    const content = document.getElementById('qrContent').value;
-    if (!content) return;
-    
+    async function generateQR() {
+        const content = document.getElementById('qrContent').value;
+        if (!content) return;
+        
+        const formData = new FormData();
+        formData.append('content', content);
+        formData.append('filename', 'temp_qr');
+        
+        const initialResponse = await fetch('qr_generator.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (initialResponse.ok) {
+            const data = await initialResponse.json();
+            const qrInput = document.querySelector('input[name="qr_code"]');
+            
+            // Create preview
+            const previewDiv = document.getElementById('qrPreview');
+            previewDiv.innerHTML = `<img src="${data.qr_file}" style="max-width: 200px;" />`;
+            
+            // Create a new File object from the generated QR code
+            const qrResponse = await fetch(data.qr_file);
+            const blob = await qrResponse.blob();
+            const file = new File([blob], 'generated_qr.png', { type: 'image/png' });
+            
+            // Update the file input
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            qrInput.files = dataTransfer.files;
+        }
+    }
+
+    function generateContactQR() {
+    // Get all the field values
+    const firstName = document.getElementById('firstName').value;
+    const lastName = document.getElementById('lastName').value;
+    const company = document.getElementById('company').value;
+    const jobTitle = document.getElementById('jobTitle').value;
+    const mobile = document.getElementById('mobile').value;
+    const phone = document.getElementById('phone').value;
+    const email = document.getElementById('email').value;
+    const website = document.getElementById('website').value;
+    const street = document.getElementById('street').value;
+    const city = document.getElementById('city').value;
+    const state = document.getElementById('state').value;
+    const country = document.getElementById('country').value;
+    const birthday = document.getElementById('birthday').value;
+
+    // Create vCard format with proper line endings
+    const vCard = `BEGIN:VCARD\r\n\
+VERSION:3.0\r\n\
+N:${lastName};${firstName};;;\r\n\
+FN:${firstName} ${lastName}\r\n\
+ORG:${company}\r\n\
+TITLE:${jobTitle}\r\n\
+TEL;TYPE=CELL:${mobile}\r\n\
+TEL;TYPE=WORK:${phone}\r\n\
+EMAIL:${email}\r\n\
+URL:${website}\r\n\
+ADR;TYPE=WORK:;;${street};${city};${state};;${country}\r\n\
+BDAY:${birthday.replace(/-/g, '')}\r\n\
+END:VCARD`;
+
+    console.log('Generated vCard:', vCard); // Debug output
+
+    // Send to QR generator
     const formData = new FormData();
-    formData.append('content', content);
-    formData.append('filename', 'temp_qr');
+    formData.append('content', vCard);
+    formData.append('filename', `contact_${firstName}_${lastName}`);
     
-    const initialResponse = await fetch('qr_generator.php', {
+    fetch('qr_generator.php', {
         method: 'POST',
         body: formData
-    });
-    
-    if (initialResponse.ok) {
-        const data = await initialResponse.json();
-        const qrInput = document.querySelector('input[name="qr_code"]');
-        
-        // Create preview
-        const previewDiv = document.getElementById('qrPreview');
-        previewDiv.innerHTML = `<img src="${data.qr_file}" style="max-width: 200px;" />`;
-        
-        // Create a new File object from the generated QR code
-        const qrResponse = await fetch(data.qr_file);
-        const blob = await qrResponse.blob();
-        const file = new File([blob], 'generated_qr.png', { type: 'image/png' });
-        
-        // Update the file input
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-        qrInput.files = dataTransfer.files;
-    }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('QR Generation Response:', data); // Debug output
+            const previewDiv = document.getElementById('qrPreview');
+            previewDiv.innerHTML = `<img src="${data.qr_file}" style="max-width: 200px;" />`;
+            
+            // Update the QR code input field
+            const qrInput = document.querySelector('input[name="qr_code"]');
+            fetch(data.qr_file)
+                .then(response => response.blob())
+                .then(blob => {
+                    const file = new File([blob], 'contact_qr.png', { type: 'image/png' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    qrInput.files = dataTransfer.files;
+                });
+        }
+    })
+    .catch(error => console.error('Error:', error));
 }
+
+
 
     </script>
 </body>
