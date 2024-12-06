@@ -209,40 +209,49 @@ function getGeneratedCards() {
             }
         }
 
-        // Add this function to your existing script section
-        function printCard(frontImage, backImage) {
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Print ID Card</title>
-                    <style>
-                        @media print {
-                            img {
-                                max-width: 100%;
-                                page-break-after: always;
-                            }
-                        }
-                        body {
-                            margin: 0;
-                            padding: 20px;
-                            text-align: center;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <img src="${frontImage}" alt="Front">
-                    <img src="${backImage}" alt="Back">
-                    <script>
-                        window.onload = function() {
-                            window.print();
-                            window.onfocus = function() { window.close(); }
-                        }
-                    <\/script>
-                </body>
-                </html>
-            `);
-        }
+
+function printCard(frontImage, backImage) {
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Print ID Card</title>
+            <style>
+                @page {
+                    size: letter;  /* Using standard letter size */
+                }
+                .card-container {
+                    width: 100%;
+                    max-width: 8.5in;
+                    margin: 0 auto;
+                    padding: 0.5in;
+                }
+                .card-image {
+                    display: block;
+                    width: 2.204in;
+                    margin: 0 auto 1in auto;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="card-container">
+                <img src="${frontImage}" alt="Front" class="card-image">
+                <img src="${backImage}" alt="Back" class="card-image">
+            </div>
+        </body>
+        </html>
+    `);
+    
+    // Wait for images to load before printing
+    printWindow.document.close();
+    printWindow.onload = function() {
+        setTimeout(() => {
+            printWindow.focus();
+            printWindow.print();
+        }, 250);
+    };
+}
+
 
     </script>
 </body>
