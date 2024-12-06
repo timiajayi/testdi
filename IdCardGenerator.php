@@ -37,50 +37,6 @@ class IdCardGenerator {
         return $filename;
     }
     
-    // private function wrapText($image, $text, $font, $size, $color, $x, $y, $maxWidth, $angle = 0, $lineHeight = 1.5) {
-    //     $words = explode(' ', $text);
-    //     $lines = [];
-    //     $currentLine = '';
-        
-    //     foreach ($words as $word) {
-    //         $testLine = $currentLine . ' ' . $word;
-    //         $bbox = imagettfbbox($size, $angle, $font, $testLine);
-            
-    //         // Adjust width calculation based on angle
-    //         $lineWidth = ($angle == 90) ? 
-    //             abs($bbox[1] - $bbox[7]) : 
-    //             abs($bbox[2] - $bbox[0]);
-            
-    //         if ($lineWidth > $maxWidth && $currentLine !== '') {
-    //             $lines[] = $currentLine;
-    //             $currentLine = $word;
-    //         } else {
-    //             $currentLine = trim($testLine);
-    //         }
-    //     }
-    //     $lines[] = $currentLine;
-        
-    //     // Calculate total height/width based on orientation
-    //     $totalSize = count($lines) * $size * $lineHeight;
-        
-    //     foreach ($lines as $index => $line) {
-    //         $bbox = imagettfbbox($size, $angle, $font, $line);
-            
-    //         if ($angle == 90) {
-    //             // Vertical text centering
-    //             $lineWidth = abs($bbox[1] - $bbox[7]);
-    //             $lineX = $x - ($index * $size * $lineHeight);
-    //             $lineY = $y + ($maxWidth - $lineWidth) / 2;
-    //         } else {
-    //             // Horizontal text centering
-    //             $lineWidth = abs($bbox[2] - $bbox[0]);
-    //             $lineX = $x + ($maxWidth - $lineWidth) / 2;
-    //             $lineY = $y + ($index * $size * $lineHeight);
-    //         }
-            
-    //         imagettftext($image, $size, $angle, $lineX, $lineY, $color, $font, $line);
-    //     }
-    // }
     
     private function wrapText($image, $text, $font, $size, $color, $x, $y, $maxWidth, $angle = 0) {
         $currentSize = $size;
@@ -120,21 +76,25 @@ class IdCardGenerator {
     
     private function processFrontSide($template, $data) {
         // Create circular profile photo
-        $user_image = $this->createCircularImage($data['user_image'], 307);
+        $user_image = $this->createCircularImage($data['user_image'], 307.5);
         
         // Adjust position for profile photo (x, y coordinates)
-        imagecopy($template, $user_image, 171.26, 410, 0, 0, imagesx($user_image), imagesy($user_image));
+        imagecopy($template, $user_image, 171.5, 410, 0, 0, imagesx($user_image), imagesy($user_image));
+
+         // Create green color for name
+        $green_color = imagecolorallocate($template, 11, 135, 9); // RGB for green
+        
+        // Create red color for department
+        $red_color = imagecolorallocate($template, 255, 0, 0); // RGB for red
         
         // Add name text with bold font
         $text_color = imagecolorallocate($template, 0, 0, 0);
-        // imagettftext($template, 24, 0, 150, 900, $text_color, $this->font_path_bold, $data['full_name']);
-        $this->wrapText($template, $data['full_name'], $this->font_path_bold, 24, $text_color, 130, 900, 400);
+        $this->wrapText($template, $data['full_name'], $this->font_path_bold, 24, $green_color, 130, 900, 400);
 
         
         // Add department text if provided
         if (!empty($data['department'])) {
-            // imagettftext($template, 20, 0, 150, 940, $text_color, $this->font_path_regular, $data['department']);
-            $this->wrapText($template, $data['department'], $this->font_path_regular, 20, $text_color, 130, 940, 400);
+            $this->wrapText($template, $data['department'], $this->font_path_regular, 20, $red_color, 130, 940, 400);
         }
         
         return $template;
@@ -145,7 +105,7 @@ class IdCardGenerator {
         if (!empty($data['id_number'])) {
             $text_color = imagecolorallocate($template, 0, 0, 0);
             // imagettftext($template, 36, 90, 550, 350, $text_color, $this->font_path_bold, $data['id_number']);
-            $this->wrapText($template, $data['id_number'], $this->font_path_bold, 36, $text_color, 550, 250, 100, 90);
+            $this->wrapText($template, $data['id_number'], $this->font_path_bold, 60, $text_color, 550, 250, 150, 90);
         }
         
         // Add QR code if provided with specific positioning
@@ -158,46 +118,66 @@ class IdCardGenerator {
     }
 
     private function createCircularImage($image_path, $diameter) {
+        // Create source image
         $source = imagecreatefromstring(file_get_contents($image_path));
         $width = imagesx($source);
         $height = imagesy($source);
         
-        // Calculate crop dimensions for square
+        // Calculate crop dimensions
         $size = min($width, $height);
         $x = ($width - $size) / 2;
         $y = ($height - $size) / 2;
         
-        // Create output image with transparency
+        // Create transparent output image
         $output = imagecreatetruecolor($diameter, $diameter);
-        imagealphablending($output, true);
+        imagealphablending($output, false);
         imagesavealpha($output, true);
         
-        // Fill with transparency
+        // Fill with complete transparency
         $transparent = imagecolorallocatealpha($output, 0, 0, 0, 127);
-        imagefilledellipse($output, $diameter/2, $diameter/2, $diameter, $diameter, $transparent);
+        imagefilledrectangle($output, 0, 0, $diameter, $diameter, $transparent);
         
-        // Create circular mask
+        // Enable alpha blending for proper transparency handling
+        imagealphablending($output, true);
+        
+        // Create a circular mask
         $mask = imagecreatetruecolor($diameter, $diameter);
         $black = imagecolorallocate($mask, 0, 0, 0);
         $white = imagecolorallocate($mask, 255, 255, 255);
+        
+        // Fill mask with black (transparent) background
         imagefilledrectangle($mask, 0, 0, $diameter, $diameter, $black);
+        
+        // Draw white (visible) circle
         imagefilledellipse($mask, $diameter/2, $diameter/2, $diameter, $diameter, $white);
         
-        // Copy and resize the source image
+        // Copy and resize source image
         imagecopyresampled($output, $source, 0, 0, $x, $y, $diameter, $diameter, $size, $size);
         
-        // Apply the mask
-        imagealphablending($output, false);
-        imagecolortransparent($output, $black);
+        // Create final output with transparency
+        $final = imagecreatetruecolor($diameter, $diameter);
+        imagealphablending($final, false);
+        imagesavealpha($final, true);
+        imagefilledrectangle($final, 0, 0, $diameter, $diameter, $transparent);
         
-        // Clean up
+        // Apply circular mask
+        for($x = 0; $x < $diameter; $x++) {
+            for($y = 0; $y < $diameter; $y++) {
+                $maskColor = imagecolorat($mask, $x, $y);
+                if($maskColor == $white) {
+                    $color = imagecolorat($output, $x, $y);
+                    imagesetpixel($final, $x, $y, $color);
+                }
+            }
+        }
+        
+        // Cleanup
         imagedestroy($source);
         imagedestroy($mask);
+        imagedestroy($output);
         
-        return $output;
+        return $final;
     }
-    
-    
     
     private function resizeImage($image_path, $width, $height) {
         $original = imagecreatefromstring(file_get_contents($image_path));
