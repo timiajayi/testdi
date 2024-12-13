@@ -4,7 +4,7 @@ require_once 'IdCardGenerator.php';
 // Set up error logging
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
-ini_set('error_log', 'id_card_errors.log');
+ini_set('error_log', __DIR__ . '/id_card_errors.log');
 
 header('Content-Type: application/json');
 
