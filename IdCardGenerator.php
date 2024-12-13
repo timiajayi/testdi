@@ -63,9 +63,9 @@ class IdCardGenerator {
             $bbox = imagettfbbox($currentSize, $angle, $font, $text);
             $textHeight = abs($bbox[2] - $bbox[0]);
             $lineX = $x;
-            $lineY = $y + ($maxWidth - $textHeight) / 2;
+            $lineY = round($y + ($maxWidth - $textHeight) / 2);
         } else {
-            $lineX = $x + ($maxWidth - $textWidth) / 2;
+            $lineX = round($x + ($maxWidth - $textWidth) / 2);
             $lineY = $y;
         }
         
@@ -76,10 +76,10 @@ class IdCardGenerator {
     
     private function processFrontSide($template, $data) {
         // Create circular profile photo
-        $user_image = $this->createCircularImage($data['user_image'], 307.5);
+        $user_image = $this->createCircularImage($data['user_image'], 306);
         
         // Adjust position for profile photo (x, y coordinates)
-        imagecopy($template, $user_image, 171.5, 410, 0, 0, imagesx($user_image), imagesy($user_image));
+        imagecopy($template, $user_image, 172, 410, 0, 0, imagesx($user_image), imagesy($user_image));
 
          // Create green color for name
         $green_color = imagecolorallocate($template, 11, 135, 9); // RGB for green

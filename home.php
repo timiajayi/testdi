@@ -373,40 +373,37 @@ require_once 'auth.php';
 
 
 
-document.getElementById('idCardForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    document.getElementById('loader').style.display = 'block';
-    
-    const formData = new FormData(this);
-    
-    try {
-        const response = await fetch('generate.php', {
-            method: 'POST',
-            body: formData
-        });
+    document.getElementById('idCardForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
         
-        const data = await response.json();
+        document.getElementById('loader').style.display = 'block';
         
-        if (data.success) {
-            const basePath = window.location.origin; // This will get the base URL like "http://10.100.11.151"
-            const frontImagePath = basePath + '/' + data.front_image;
-            const backImagePath = basePath + '/' + data.back_image;
-
-            document.getElementById('frontPreview').src = frontImagePath;
-            document.getElementById('backPreview').src = backImagePath;
+        const formData = new FormData(this);
+        
+        try {
+            const response = await fetch('generate.php', {
+                method: 'POST',
+                body: formData
+            });
             
-            document.getElementById('downloadButtons').innerHTML = `
-                <a href="${frontImagePath}" download class="download-btn">Download Front</a>
-                <a href="${backImagePath}" download class="download-btn">Download Back</a>
-            `;
+            const data = await response.json();
+            
+            if (data.success) {
+                // Use relative paths for local development
+                document.getElementById('frontPreview').src = data.front_image;
+                document.getElementById('backPreview').src = data.back_image;
+                
+                document.getElementById('downloadButtons').innerHTML = `
+                    <a href="${data.front_image}" download class="download-btn">Download Front</a>
+                    <a href="${data.back_image}" download class="download-btn">Download Back</a>
+                `;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        } finally {
+            document.getElementById('loader').style.display = 'none';
         }
-    } catch (error) {
-        console.error('Error:', error);
-    } finally {
-        document.getElementById('loader').style.display = 'none';
-    }
-});
+    });
 
 
     async function generateQR() {

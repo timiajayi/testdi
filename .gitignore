@@ -2,8 +2,8 @@
 id_card_errors.log
 
 # Generated files
-# generated/
-# qrcodes/
+generated/
+qrcodes/
 
 # Vendor dependencies
 vendor/
