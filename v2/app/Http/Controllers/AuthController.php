@@ -158,4 +158,25 @@ class AuthController extends Controller
         // Redirect to SAML IdP logout
         return redirect(Config::get('saml2.idp_sls_url'));
     }
+
+    public function ldapLogin(Request $request)
+    {
+        $credentials = $request->validate([
+            'username' => 'required',
+            'password' => 'required'
+        ]);
+    
+        // LDAP authentication logic here
+        try {
+            $ldap_conn = ldap_connect(env('LDAP_HOST'), env('LDAP_PORT'));
+            ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
+            ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
+    
+            // Rest of your LDAP authentication code
+        } catch (\Exception $e) {
+            \Log::error('LDAP Error: ' . $e->getMessage());
+            return back()->withErrors(['username' => 'LDAP authentication failed']);
+        }
+    }
+    
 }
