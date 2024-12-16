@@ -1,8 +1,10 @@
+<?php
+require_once 'auth.php';
+?>
 <!DOCTYPE html>
 <html>
 <head>
     <title>ID Card Generator</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css">
     <style>
         body {
@@ -182,7 +184,7 @@
 </head>
 <body>
     <div class="company-header">
-    <img src="{{ asset('templates/logo.png') }}" alt="Company Logo" class="company-logo">
+        <img src="./templates/logo.png" alt="Company Logo" class="company-logo">
         <h1>ID Card Generator</h1>
     </div>
 
@@ -284,7 +286,7 @@
             <button type="submit">Generate ID Card</button>
         </form>
         <div class="nav-links">
-        <a href="{{ route('gallery') }}" class="nav-link">View ID Card Gallery</a>
+            <a href="gallery.php" class="nav-link">View ID Card Gallery</a>
         </div>
         
     </div>
@@ -337,122 +339,74 @@
         });
 
         document.getElementById('crop-button').addEventListener('click', function() {
-    croppie.result({
-        type: 'blob',
-        size: { width: 307, height: 307 },
-        format: 'jpeg',
-        quality: 1,
-        circle: true
-    }).then(function(blob) {
-        const croppedFile = new File([blob], "profile.jpg", { type: "image/jpeg" });
-        
-        // Update the original file input
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(croppedFile);
-        document.getElementById('image-input').files = dataTransfer.files;
-        
-        // Show preview
-        const previewUrl = URL.createObjectURL(blob);
-        const preview = document.createElement('img');
-        preview.src = previewUrl;
-        preview.style.width = '150px';
-        preview.style.height = '150px';
-        preview.style.borderRadius = '50%';
-        preview.style.objectFit = 'cover';
-        preview.style.marginTop = '10px';
-        
-        const container = document.getElementById('cropper-container');
-        container.innerHTML = '';
-        container.appendChild(preview);
-        
-        document.getElementById('crop-button').style.display = 'none';
-    });
-});
-
-
-
-document.getElementById('idCardForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    document.getElementById('loader').style.display = 'block';
-    
-    const formData = new FormData(this);
-    
-    try {
-        const response = await fetch('/generate', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: formData
+            croppie.result({
+                type: 'blob',
+                size: { width: 307, height: 307 },
+                format: 'jpeg',
+                quality: 1,
+                circle: true
+            }).then(function(blob) {
+                const croppedFile = new File([blob], "profile.jpg", { type: "image/jpeg" });
+                
+                // Update the original file input
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(croppedFile);
+                document.getElementById('image-input').files = dataTransfer.files;
+                
+                // Show preview
+                const previewUrl = URL.createObjectURL(blob);
+                const preview = document.createElement('img');
+                preview.src = previewUrl;
+                preview.style.width = '150px';
+                preview.style.height = '150px';
+                preview.style.borderRadius = '50%';
+                preview.style.objectFit = 'cover';
+                preview.style.marginTop = '10px';
+                
+                const container = document.getElementById('cropper-container');
+                container.innerHTML = '';
+                container.appendChild(preview);
+                
+                document.getElementById('crop-button').style.display = 'none';
+            });
         });
+
+
+
+    document.getElementById('idCardForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
         
-        const data = await response.json();
+        document.getElementById('loader').style.display = 'block';
         
-        if (data.success) {
-            document.getElementById('frontPreview').src = data.front_image;
-            document.getElementById('backPreview').src = data.back_image;
+        const formData = new FormData(this);
+        
+        try {
+            const response = await fetch('{{ route("generate") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: formData
+            });
             
-            document.getElementById('downloadButtons').innerHTML = `
-                <a href="${data.front_image}" download class="download-btn">Download Front</a>
-                <a href="${data.back_image}" download class="download-btn">Download Back</a>
-            `;
-        }
-    } catch (error) {
-        console.error('Error:', error);
-    } finally {
-        document.getElementById('loader').style.display = 'none';
-    }
-});
-
-function generateContactQR() {
-    const formData = new FormData();
-    
-    const fields = {
-        'firstName': document.getElementById('firstName').value,
-        'lastName': document.getElementById('lastName').value,
-        'company': document.getElementById('company').value,
-        'jobTitle': document.getElementById('jobTitle').value,
-        'mobile': document.getElementById('mobile').value,
-        'phone': document.getElementById('phone').value,
-        'email': document.getElementById('email').value,
-        'website': document.getElementById('website').value,
-        'street': document.getElementById('street').value,
-        'city': document.getElementById('city').value,
-        'state': document.getElementById('state').value,
-        'country': document.getElementById('country').value,
-        'birthday': document.getElementById('birthday').value
-    };
-
-    Object.keys(fields).forEach(key => {
-        formData.append(key, fields[key]);
-    });
-
-    fetch('/generate-qr', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const previewDiv = document.getElementById('qrPreview');
-            previewDiv.innerHTML = `<img src="${data.qr_url}" style="max-width: 200px;" />`;
+            const data = await response.json();
             
-            const qrInput = document.querySelector('input[name="qr_code"]');
-            fetch(data.qr_url)
-                .then(response => response.blob())
-                .then(blob => {
-                    const file = new File([blob], 'contact_qr.png', { type: 'image/png' });
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    qrInput.files = dataTransfer.files;
-                });
+            if (data.success) {
+                document.getElementById('frontPreview').src = data.front_image;
+                document.getElementById('backPreview').src = data.back_image;
+                
+                document.getElementById('downloadButtons').innerHTML = `
+                    <a href="${data.front_image}" download class="download-btn">Download Front</a>
+                    <a href="${data.back_image}" download class="download-btn">Download Back</a>
+                `;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        } finally {
+            document.getElementById('loader').style.display = 'none';
         }
     });
-}
+
 
 
     async function generateQR() {
@@ -487,6 +441,71 @@ function generateContactQR() {
             qrInput.files = dataTransfer.files;
         }
     }
+
+    function generateContactQR() {
+    // Get all the field values
+    const firstName = document.getElementById('firstName').value;
+    const lastName = document.getElementById('lastName').value;
+    const company = document.getElementById('company').value;
+    const jobTitle = document.getElementById('jobTitle').value;
+    const mobile = document.getElementById('mobile').value;
+    const phone = document.getElementById('phone').value;
+    const email = document.getElementById('email').value;
+    const website = document.getElementById('website').value;
+    const street = document.getElementById('street').value;
+    const city = document.getElementById('city').value;
+    const state = document.getElementById('state').value;
+    const country = document.getElementById('country').value;
+    const birthday = document.getElementById('birthday').value;
+
+    // Create vCard format with proper line endings
+    const vCard = `BEGIN:VCARD\r\n\
+VERSION:3.0\r\n\
+N:${lastName};${firstName};;;\r\n\
+FN:${firstName} ${lastName}\r\n\
+ORG:${company}\r\n\
+TITLE:${jobTitle}\r\n\
+TEL;TYPE=CELL:${mobile}\r\n\
+TEL;TYPE=WORK:${phone}\r\n\
+EMAIL:${email}\r\n\
+URL:${website}\r\n\
+ADR;TYPE=WORK:;;${street};${city};${state};;${country}\r\n\
+BDAY:${birthday.replace(/-/g, '')}\r\n\
+END:VCARD`;
+
+    console.log('Generated vCard:', vCard); // Debug output
+
+    // Send to QR generator
+    const formData = new FormData();
+    formData.append('content', vCard);
+    formData.append('filename', `contact_${firstName}_${lastName}`);
+    
+    fetch('qr_generator.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('QR Generation Response:', data); // Debug output
+            const previewDiv = document.getElementById('qrPreview');
+            previewDiv.innerHTML = `<img src="${data.qr_file}" style="max-width: 200px;" />`;
+            
+            // Update the QR code input field
+            const qrInput = document.querySelector('input[name="qr_code"]');
+            fetch(data.qr_file)
+                .then(response => response.blob())
+                .then(blob => {
+                    const file = new File([blob], 'contact_qr.png', { type: 'image/png' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    qrInput.files = dataTransfer.files;
+                });
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
 
 
     </script>
