@@ -6,6 +6,7 @@ require_once 'auth.php';
 <head>
     <title>ID Card Generator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -373,40 +374,34 @@ require_once 'auth.php';
 
 
 
-    document.getElementById('idCardForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        document.getElementById('loader').style.display = 'block';
-        
-        const formData = new FormData(this);
-        
-        try {
-            const response = await fetch('{{ route("generate") }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: formData
-            });
+        document.getElementById('idCardForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            const data = await response.json();
+            document.getElementById('loader').style.display = 'block';
+            const formData = new FormData(this);
             
-            if (data.success) {
-                document.getElementById('frontPreview').src = data.front_image;
-                document.getElementById('backPreview').src = data.back_image;
+            try {
+                const response = await fetch('generate.php', {
+                    method: 'POST',
+                    body: formData
+                });
                 
-                document.getElementById('downloadButtons').innerHTML = `
-                    <a href="${data.front_image}" download class="download-btn">Download Front</a>
-                    <a href="${data.back_image}" download class="download-btn">Download Back</a>
-                `;
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('frontPreview').src = data.front_image;
+                    document.getElementById('backPreview').src = data.back_image;
+                    
+                    document.getElementById('downloadButtons').innerHTML = `
+                        <a href="${data.front_image}" download class="download-btn">Download Front</a>
+                        <a href="${data.back_image}" download class="download-btn">Download Back</a>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                document.getElementById('loader').style.display = 'none';
             }
-        } catch (error) {
-            console.error('Error:', error);
-        } finally {
-            document.getElementById('loader').style.display = 'none';
-        }
-    });
-
+        });
 
 
     async function generateQR() {
