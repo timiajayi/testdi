@@ -21,49 +21,45 @@ class AuthController extends Controller
             'username' => 'required',
             'password' => 'required'
         ]);
-
+    
         // Try local database authentication first
         if (Auth::attempt(['email' => $credentials['username'], 'password' => $credentials['password']])) {
             $request->session()->regenerate();
             return redirect()->intended('/');
         }
-
+    
         // LDAP Authentication
         try {
             $ldap_conn = ldap_connect(
-                Config::get('ldap.host'),
-                Config::get('ldap.port')
+                env('LDAP_HOST'),
+                env('LDAP_PORT')
             );
-
+    
             ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
             ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
-
-            if (!$ldap_conn) {
-                throw new \Exception('Could not connect to LDAP server');
-            }
-
+    
             $ldap_bind = @ldap_bind(
                 $ldap_conn, 
-                Config::get('ldap.username'),
-                Config::get('ldap.password')
+                env('LDAP_USERNAME'),
+                env('LDAP_PASSWORD')
             );
-
+    
             if (!$ldap_bind) {
                 throw new \Exception('Invalid LDAP credentials');
             }
-
+    
             $search = ldap_search(
                 $ldap_conn, 
-                Config::get('ldap.user_search_base'), 
+                env('LDAP_USER_SEARCH_BASE'), 
                 "(sAMAccountName={$credentials['username']})"
             );
             
             $entries = ldap_get_entries($ldap_conn, $search);
-
+    
             if ($entries['count'] > 0) {
                 $user_dn = $entries[0]['dn'];
                 $user_bind = @ldap_bind($ldap_conn, $user_dn, $credentials['password']);
-
+    
                 if ($user_bind) {
                     // Create or update local user record
                     $user = User::updateOrCreate(
@@ -74,26 +70,21 @@ class AuthController extends Controller
                             'password' => Hash::make($credentials['password'])
                         ]
                     );
-
+    
                     Auth::login($user);
                     $request->session()->regenerate();
                     return redirect()->intended('/');
                 }
             }
         } catch (\Exception $e) {
-            // Log LDAP error but don't expose it
             \Log::error('LDAP Error: ' . $e->getMessage());
         }
-
-        // SAML Authentication
-        if ($this->attemptSamlAuth($request)) {
-            return redirect()->intended('/');
-        }
-
+    
         return back()->withErrors([
             'username' => 'The provided credentials do not match our records.',
         ]);
     }
+    
 
     protected function attemptSamlAuth(Request $request)
     {
