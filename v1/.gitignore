@@ -6,7 +6,7 @@ generated/
 qrcodes/
 
 # Vendor dependencies
-vendor/
+#vendor/
 
 # IDE files
 .vscode/
