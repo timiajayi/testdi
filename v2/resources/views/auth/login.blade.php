@@ -12,10 +12,16 @@
             <h1>ID Card Generator</h1>
         </div>
 
+        @if ($errors->any())
+            <div class="error-message">
+                {{ $errors->first() }}
+            </div>
+        @endif
+
         <div class="login-toggle">
-            <button onclick="showLogin('ldap')" class="active">LDAP Login</button>
-            <button onclick="showLogin('saml')">SAML SSO</button>
-            <button onclick="showLogin('normal')">Standard Login</button>
+            <button type="button" onclick="showLogin('ldap')" class="active">LDAP Login</button>
+            <button type="button" onclick="showLogin('saml')">SAML SSO</button>
+            <button type="button" onclick="showLogin('normal')">Standard Login</button>
         </div>
 
         <div class="login-options">
@@ -61,16 +67,17 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            showLogin('ldap');
+        });
+
         function showLogin(type) {
-            // Hide all forms
             document.querySelectorAll('.login-form').forEach(form => {
                 form.classList.remove('active');
             });
             
-            // Show selected form
             document.getElementById(type + '-login').classList.add('active');
             
-            // Update button states
             document.querySelectorAll('.login-toggle button').forEach(button => {
                 button.classList.remove('active');
             });
