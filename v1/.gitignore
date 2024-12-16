@@ -9,9 +9,9 @@ qrcodes/
 #vendor/
 
 # IDE files
-.vscode/
-.idea/
+# .vscode/
+# .idea/
 
 # System files
-.DS_Store
-Thumbs.db
+# .DS_Store
+# Thumbs.db
