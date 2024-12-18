@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -77,7 +79,7 @@ class AuthController extends Controller
                 }
             }
         } catch (\Exception $e) {
-            \Log::error('LDAP Error: ' . $e->getMessage());
+            Log::error('LDAP Error: ' . $e->getMessage());
         }
     
         return back()->withErrors([
@@ -127,7 +129,7 @@ class AuthController extends Controller
                     [
                         'name' => $attributes['name'][0],
                         'username' => $attributes['username'][0],
-                        'password' => Hash::make(str_random(16))
+                        'password' => Hash::make(Str::random(16))
                     ]
                 );
 
@@ -135,7 +137,7 @@ class AuthController extends Controller
                 return true;
             }
         } catch (\Exception $e) {
-            \Log::error('SAML Error: ' . $e->getMessage());
+            Log::error('SAML Error: ' . $e->getMessage());
         }
 
         return false;
@@ -166,28 +168,28 @@ public function ldapLogin(Request $request)
     ]);
 
     try {
-        \Log::info('LDAP: Attempting connection to ' . env('LDAP_HOST'));
+        Log::info('LDAP: Attempting connection to ' . env('LDAP_HOST'));
         
         $ldap_conn = ldap_connect(env('LDAP_HOST'), env('LDAP_PORT'));
         ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
         ldap_set_option($ldap_conn, LDAP_OPT_NETWORK_TIMEOUT, 10);
 
-        \Log::info('LDAP: Connection established');
+        Log::info('LDAP: Connection established');
 
         // Format the username with domain
         $ldapUsername = $credentials['username'] . '@sevenup.org';
-        \Log::info('LDAP: Attempting bind with username: ' . $ldapUsername);
+        Log::info('LDAP: Attempting bind with username: ' . $ldapUsername);
         
         //DEBUG
         ldap_get_option($ldap_conn, LDAP_OPT_DIAGNOSTIC_MESSAGE, $extended_error);
-        \Log::info('LDAP Extended Error: ' . ($extended_error ?? 'None'));
+        Log::info('LDAP Extended Error: ' . ($extended_error ?? 'None'));
 
         $userBind = @ldap_bind($ldap_conn, $ldapUsername, $credentials['password']);
-        \Log::info('LDAP: Bind result: ' . ($userBind ? 'Success' : 'Failed'));
+        Log::info('LDAP: Bind result: ' . ($userBind ? 'Success' : 'Failed'));
 
         if ($userBind) {
-            \Log::info('LDAP: User authenticated successfully');
+            Log::info('LDAP: User authenticated successfully');
             // Search for user details
             $ldapUsername = env('LDAP_USERNAME');
             $ldapPassword = env('LDAP_PASSWORD');
@@ -212,8 +214,8 @@ public function ldapLogin(Request $request)
             }
         }
     } catch (\Exception $e) {
-        \Log::error('LDAP Error: ' . $e->getMessage());
-        \Log::error('LDAP Error Trace: ' . $e->getTraceAsString());
+        Log::error('LDAP Error: ' . $e->getMessage());
+        Log::error('LDAP Error Trace: ' . $e->getTraceAsString());
     }
 
     return back()->withErrors(['username' => 'Invalid credentials']);
