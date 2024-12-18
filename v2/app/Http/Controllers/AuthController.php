@@ -160,68 +160,71 @@ class AuthController extends Controller
         // Redirect to SAML IdP logout
         return redirect(Config::get('saml2.idp_sls_url'));
     }
-public function ldapLogin(Request $request)
-{
-    $credentials = $request->validate([
-        'username' => 'required',
-        'password' => 'required'
-    ]);
+    public function ldapLogin(Request $request)
+    {
+        // Add this at the start of your ldapLogin method
+        $command = sprintf('sudo -u sevenup php -r \'$conn = ldap_connect("%s", %s);\'', env('LDAP_HOST'), env('LDAP_PORT'));
 
-    try {
-        Log::info('LDAP: Attempting connection to ' . env('LDAP_HOST'));
-        
-        $ldap_conn = ldap_connect(env('LDAP_HOST'), env('LDAP_PORT'));
-        ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-        ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
-        ldap_set_option($ldap_conn, LDAP_OPT_NETWORK_TIMEOUT, 10);
-        ldap_set_option($ldap_conn, LDAP_OPT_DEBUG_LEVEL, 7);
+        $credentials = $request->validate([
+            'username' => 'required',
+            'password' => 'required'
+        ]);
 
-        $ldapUsername1 = "sevenup\\{$credentials['username']}";
-        $ldapUsername2 = "{$credentials['username']}@sevenup.org";
-        
-        Log::info('LDAP: Attempting bind with first format: ' . $ldapUsername1);
-        ldap_get_option($ldap_conn, LDAP_OPT_DIAGNOSTIC_MESSAGE, $extended_error);
-        $userBind = @ldap_bind($ldap_conn, $ldapUsername1, $credentials['password']);
-        Log::info('LDAP Error for first bind: ' . ldap_error($ldap_conn));
-        
-        if (!$userBind) {
-            Log::info('LDAP: First bind failed, trying second format: ' . $ldapUsername2);
-            $userBind = @ldap_bind($ldap_conn, $ldapUsername2, $credentials['password']);
-            Log::info('LDAP Error for second bind: ' . ldap_error($ldap_conn));
-        }
-
-        if ($userBind) {
-            Log::info('LDAP: User authenticated successfully');
-            // Search for user details
-            $ldapUsername = env('LDAP_USERNAME');
-            $ldapPassword = env('LDAP_PASSWORD');
+        try {
+            Log::info('LDAP: Attempting connection to ' . env('LDAP_HOST'));
             
-            $adminBind = @ldap_bind($ldap_conn, $ldapUsername, $ldapPassword);
+            $ldap_conn = ldap_connect(env('LDAP_HOST'), env('LDAP_PORT'));
+            ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
+            ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
+            ldap_set_option($ldap_conn, LDAP_OPT_NETWORK_TIMEOUT, 10);
+            ldap_set_option($ldap_conn, LDAP_OPT_DEBUG_LEVEL, 7);
+
+            $ldapUsername1 = "sevenup\\{$credentials['username']}";
+            $ldapUsername2 = "{$credentials['username']}@sevenup.org";
             
-            $search = ldap_search($ldap_conn, env('LDAP_USER_SEARCH_BASE'), "(sAMAccountName={$credentials['username']})");
-            $entries = ldap_get_entries($ldap_conn, $search);
-
-            if ($entries['count'] > 0) {
-                $user = User::updateOrCreate(
-                    ['username' => $credentials['username']],
-                    [
-                        'name' => $entries[0]['displayname'][0] ?? $credentials['username'],
-                        'email' => $entries[0]['mail'][0] ?? '',
-                        'password' => Hash::make($credentials['password'])
-                    ]
-                );
-
-                Auth::login($user);
-                return redirect()->route('home');
+            Log::info('LDAP: Attempting bind with first format: ' . $ldapUsername1);
+            ldap_get_option($ldap_conn, LDAP_OPT_DIAGNOSTIC_MESSAGE, $extended_error);
+            $userBind = @ldap_bind($ldap_conn, $ldapUsername1, $credentials['password']);
+            Log::info('LDAP Error for first bind: ' . ldap_error($ldap_conn));
+            
+            if (!$userBind) {
+                Log::info('LDAP: First bind failed, trying second format: ' . $ldapUsername2);
+                $userBind = @ldap_bind($ldap_conn, $ldapUsername2, $credentials['password']);
+                Log::info('LDAP Error for second bind: ' . ldap_error($ldap_conn));
             }
-        }
-    } catch (\Exception $e) {
-        Log::error('LDAP Error: ' . $e->getMessage());
-        Log::error('LDAP Error Trace: ' . $e->getTraceAsString());
-    }
 
-    return back()->withErrors(['username' => 'Invalid credentials']);
-}
+            if ($userBind) {
+                Log::info('LDAP: User authenticated successfully');
+                // Search for user details
+                $ldapUsername = env('LDAP_USERNAME');
+                $ldapPassword = env('LDAP_PASSWORD');
+                
+                $adminBind = @ldap_bind($ldap_conn, $ldapUsername, $ldapPassword);
+                
+                $search = ldap_search($ldap_conn, env('LDAP_USER_SEARCH_BASE'), "(sAMAccountName={$credentials['username']})");
+                $entries = ldap_get_entries($ldap_conn, $search);
+
+                if ($entries['count'] > 0) {
+                    $user = User::updateOrCreate(
+                        ['username' => $credentials['username']],
+                        [
+                            'name' => $entries[0]['displayname'][0] ?? $credentials['username'],
+                            'email' => $entries[0]['mail'][0] ?? '',
+                            'password' => Hash::make($credentials['password'])
+                        ]
+                    );
+
+                    Auth::login($user);
+                    return redirect()->route('home');
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('LDAP Error: ' . $e->getMessage());
+            Log::error('LDAP Error Trace: ' . $e->getTraceAsString());
+        }
+
+        return back()->withErrors(['username' => 'Invalid credentials']);
+    }
 
     public function standardLogin(Request $request)
     {
