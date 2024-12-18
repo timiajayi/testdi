@@ -174,6 +174,8 @@ public function ldapLogin(Request $request)
         ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
         ldap_set_option($ldap_conn, LDAP_OPT_NETWORK_TIMEOUT, 10);
+        ldap_set_option($ldap_conn, LDAP_OPT_X_TLS_REQUIRE_CERT, LDAP_OPT_X_TLS_NEVER);
+        ldap_start_tls($ldap_conn);
 
         Log::info('LDAP: Connection established');
 
