@@ -178,7 +178,7 @@ public function ldapLogin(Request $request)
         Log::info('LDAP: Connection established');
 
         // Format the username with domain
-        $ldapUsername = "sevenup.org\\{$credentials['username']}";
+        $ldapUsername = "sevenup\\{$credentials['username']}";
         Log::info('LDAP: Attempting bind with username: ' . $ldapUsername);
         
         //DEBUG
