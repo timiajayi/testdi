@@ -174,21 +174,18 @@ public function ldapLogin(Request $request)
         ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
         ldap_set_option($ldap_conn, LDAP_OPT_NETWORK_TIMEOUT, 10);
-        ldap_set_option($ldap_conn, LDAP_OPT_X_TLS_REQUIRE_CERT, LDAP_OPT_X_TLS_NEVER);
-        ldap_start_tls($ldap_conn);
 
-        Log::info('LDAP: Connection established');
-
-        // Format the username with domain
-        $ldapUsername = "sevenup\\{$credentials['username']}";
-        Log::info('LDAP: Attempting bind with username: ' . $ldapUsername);
+        // Try both binding formats
+        $ldapUsername1 = "sevenup\\{$credentials['username']}";
+        $ldapUsername2 = "{$credentials['username']}@sevenup.org";
         
-        //DEBUG
-        ldap_get_option($ldap_conn, LDAP_OPT_DIAGNOSTIC_MESSAGE, $extended_error);
-        Log::info('LDAP Extended Error: ' . ($extended_error ?? 'None'));
-
-        $userBind = @ldap_bind($ldap_conn, $ldapUsername, $credentials['password']);
-        Log::info('LDAP: Bind result: ' . ($userBind ? 'Success' : 'Failed'));
+        Log::info('LDAP: Attempting bind with first format: ' . $ldapUsername1);
+        $userBind = @ldap_bind($ldap_conn, $ldapUsername1, $credentials['password']);
+        
+        if (!$userBind) {
+            Log::info('LDAP: First bind failed, trying second format: ' . $ldapUsername2);
+            $userBind = @ldap_bind($ldap_conn, $ldapUsername2, $credentials['password']);
+        }
 
         if ($userBind) {
             Log::info('LDAP: User authenticated successfully');
