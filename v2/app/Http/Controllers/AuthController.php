@@ -174,6 +174,7 @@ public function ldapLogin(Request $request)
         ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
         ldap_set_option($ldap_conn, LDAP_OPT_NETWORK_TIMEOUT, 10);
+        ldap_set_option($ldap_conn, LDAP_OPT_DEBUG_LEVEL, 7);
 
         $ldapUsername1 = "sevenup\\{$credentials['username']}";
         $ldapUsername2 = "{$credentials['username']}@sevenup.org";
