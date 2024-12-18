@@ -166,17 +166,67 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
     
-        // LDAP authentication logic here
         try {
             $ldap_conn = ldap_connect(env('LDAP_HOST'), env('LDAP_PORT'));
             ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
             ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
+            ldap_set_option($ldap_conn, LDAP_OPT_NETWORK_TIMEOUT, 10);
     
-            // Rest of your LDAP authentication code
+            // Format the username with domain
+            $ldapUsername = $credentials['username'] . '@sevenup.org';
+            //DEBUG
+            ldap_get_option($ldap_conn, LDAP_OPT_DIAGNOSTIC_MESSAGE, $extended_error);
+
+            // Try direct bind with user credentials
+            $userBind = @ldap_bind($ldap_conn, $ldapUsername, $credentials['password']);
+    
+            if ($userBind) {
+                // Search for user details
+                $ldapUsername = env('LDAP_USERNAME');
+                $ldapPassword = env('LDAP_PASSWORD');
+                
+                $adminBind = @ldap_bind($ldap_conn, $ldapUsername, $ldapPassword);
+                
+                $search = ldap_search($ldap_conn, env('LDAP_USER_SEARCH_BASE'), "(sAMAccountName={$credentials['username']})");
+                $entries = ldap_get_entries($ldap_conn, $search);
+    
+                if ($entries['count'] > 0) {
+                    $user = User::updateOrCreate(
+                        ['username' => $credentials['username']],
+                        [
+                            'name' => $entries[0]['displayname'][0] ?? $credentials['username'],
+                            'email' => $entries[0]['mail'][0] ?? '',
+                            'password' => Hash::make($credentials['password'])
+                        ]
+                    );
+    
+                    Auth::login($user);
+                    return redirect()->route('home');
+                }
+            }
         } catch (\Exception $e) {
             \Log::error('LDAP Error: ' . $e->getMessage());
-            return back()->withErrors(['username' => 'LDAP authentication failed']);
         }
+    
+        return back()->withErrors(['username' => 'Invalid credentials']);
     }
+    
+
+    public function standardLogin(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
+    
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return redirect()->route('home'); // Change this line to use named route
+        }
+    
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ]);
+    }    
     
 }

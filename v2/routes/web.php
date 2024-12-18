@@ -10,12 +10,12 @@ Route::get('/', function () {
 });
 
 // Authentication Routes
-// Authentication Routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('standard.login');
+Route::post('/standard-login', [AuthController::class, 'standardLogin'])->name('standard.login');
 Route::post('/ldap/login', [AuthController::class, 'ldapLogin'])->name('ldap.login');
 Route::get('/saml/login', [AuthController::class, 'samlLogin'])->name('saml.login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
 
 
 // Protected Routes

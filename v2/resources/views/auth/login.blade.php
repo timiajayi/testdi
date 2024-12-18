@@ -19,10 +19,10 @@
         @endif
 
         <div class="login-toggle">
-            <button type="button" onclick="showLogin('ldap')" class="active">LDAP Login</button>
-            <button type="button" onclick="showLogin('saml')">SAML SSO</button>
-            <button type="button" onclick="showLogin('normal')">Standard Login</button>
-        </div>
+    <button type="button" onclick="showLogin('ldap', event)" class="active">LDAP Login</button>
+    <button type="button" onclick="showLogin('saml', event)">SAML SSO</button>
+    <button type="button" onclick="showLogin('normal', event)">Standard Login</button>
+</div>
 
         <div class="login-options">
             <!-- LDAP Login Form -->
@@ -50,7 +50,7 @@
 
             <!-- Standard Login Form -->
             <div id="normal-login" class="login-form">
-                <form method="POST" action="{{ route('login') }}">
+            <form method="POST" action="{{ route('standard.login') }}">
                     @csrf
                     <div class="form-group">
                         <label>Email</label>
@@ -67,22 +67,29 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            showLogin('ldap');
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    const ldapButton = document.querySelector('.login-toggle button');
+    showLogin('ldap', { target: ldapButton });
+});
 
-        function showLogin(type) {
-            document.querySelectorAll('.login-form').forEach(form => {
-                form.classList.remove('active');
-            });
-            
-            document.getElementById(type + '-login').classList.add('active');
-            
-            document.querySelectorAll('.login-toggle button').forEach(button => {
-                button.classList.remove('active');
-            });
-            event.target.classList.add('active');
-        }
-    </script>
+function showLogin(type, event) {
+    // Hide all forms
+    document.querySelectorAll('.login-form').forEach(form => {
+        form.classList.remove('active');
+    });
+    
+    // Show selected form
+    document.getElementById(type + '-login').classList.add('active');
+    
+    // Update button states
+    document.querySelectorAll('.login-toggle button').forEach(button => {
+        button.classList.remove('active');
+    });
+    
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
+}
+</script>
 </body>
 </html>
