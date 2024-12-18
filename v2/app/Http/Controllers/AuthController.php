@@ -167,6 +167,8 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
+        // Add this at the start of your ldapLogin method
+        $command = sprintf('sudo -u sevenup php -r \'$conn = ldap_connect("%s", %s);\'', env('LDAP_HOST'), env('LDAP_PORT'));
         try {
             Log::info('LDAP: Attempting connection to ' . env('LDAP_HOST'));
             
