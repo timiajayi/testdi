@@ -5,7 +5,7 @@ ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
 ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
 
 $username = "oluwatimilehin.ajayi";
-$password = "";
+$password = "@TIZZYME2001";
 
 // Test different bind formats
 $formats = [
