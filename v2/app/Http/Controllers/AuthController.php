@@ -175,16 +175,18 @@ public function ldapLogin(Request $request)
         ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
         ldap_set_option($ldap_conn, LDAP_OPT_NETWORK_TIMEOUT, 10);
 
-        // Try both binding formats
         $ldapUsername1 = "sevenup\\{$credentials['username']}";
         $ldapUsername2 = "{$credentials['username']}@sevenup.org";
         
         Log::info('LDAP: Attempting bind with first format: ' . $ldapUsername1);
+        ldap_get_option($ldap_conn, LDAP_OPT_DIAGNOSTIC_MESSAGE, $extended_error);
         $userBind = @ldap_bind($ldap_conn, $ldapUsername1, $credentials['password']);
+        Log::info('LDAP Error for first bind: ' . ldap_error($ldap_conn));
         
         if (!$userBind) {
             Log::info('LDAP: First bind failed, trying second format: ' . $ldapUsername2);
             $userBind = @ldap_bind($ldap_conn, $ldapUsername2, $credentials['password']);
+            Log::info('LDAP Error for second bind: ' . ldap_error($ldap_conn));
         }
 
         if ($userBind) {
