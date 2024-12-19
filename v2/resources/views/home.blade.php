@@ -13,6 +13,16 @@
         <img src="{{ asset('templates/logo.png') }}" alt="Company Logo" class="company-logo">
         <h1>ID Card Generator</h1>
     </div>
+    <div class="nav-links">
+    <a href="{{ route('gallery') }}" class="nav-link">View ID Card Gallery</a>
+    @if(auth()->user()->is_admin)
+        <a href="{{ route('admin.dashboard') }}" class="nav-link">Admin Dashboard</a>
+    @endif
+    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+        @csrf
+        <button type="submit" class="nav-link" style="border: none; cursor: pointer;">Logout</button>
+    </form>
+</div>
 
     <div class="form-container">
         <form id="idCardForm">
