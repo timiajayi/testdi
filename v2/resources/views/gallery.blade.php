@@ -40,7 +40,7 @@
             data-name="{{ $card['name'] }}"
             data-lastname="{{ $card['last_name'] }}"
             data-date="{{ date('Y-m-d', strtotime($card['date'])) }}"
-            data-region="{{ $card['region'] }}">
+            data-region="{{ $card['region'] ?? 'N/A' }}">
             <div class="card-info">
                 <h3>First Name: {{ $card['name'] }}</h3>
                 <p>Last Name: {{ $card['last_name'] }}</p>
