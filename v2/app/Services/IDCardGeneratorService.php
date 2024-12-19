@@ -30,7 +30,8 @@ class IDCardGeneratorService
         $back_card = $this->processBackSide($back_template, $data);
         
         $sanitized_name = preg_replace('/[^A-Za-z0-9]/', '_', $data['full_name']);
-        $filename = strtolower($sanitized_name) . '_' . date('Ymd_His');
+        $region = preg_replace('/[^A-Za-z0-9]/', '_', $data['region']);
+        $filename = strtolower($sanitized_name) . '_' . date('Ymd_His') . '_' . $region;
         
         $front_path = public_path($this->output_path . $filename . "_front.jpg");
         $back_path = public_path($this->output_path . $filename . "_back.jpg");
@@ -207,15 +208,19 @@ class IDCardGeneratorService
             preg_match('/(\d{8}_\d{6})/', $filename, $matches);
             $date = isset($matches[1]) ? date('Y-m-d H:i:s', strtotime(str_replace('_', ' ', $matches[1]))) : '';
             
-            // Extract first and last name from filename
-            $nameParts = explode('_', $filename);
-            $firstName = ucfirst($nameParts[0]);
-            $lastName = ucfirst($nameParts[1]);
+            // Extract name parts and region from filename
+            $parts = explode('_', $filename);
+            $firstName = ucfirst($parts[0]);
+            $lastName = ucfirst($parts[1]);
+            
+            // Get region (will be the second-to-last part before _front.jpg)
+            $region = isset($parts[count($parts)-2]) ? strtoupper($parts[count($parts)-2]) : 'N/A';
             
             $cards[] = [
                 'name' => $firstName,
                 'last_name' => $lastName,
                 'date' => $date,
+                'region' => $region,
                 'front_image' => 'generated/' . $filename,
                 'back_image' => 'generated/' . $back_image
             ];
@@ -226,7 +231,7 @@ class IDCardGeneratorService
         });
         
         return $cards;
-    }   
+    }
 
     public function deleteCard($filename)
     {

@@ -12,7 +12,9 @@ class IDCard extends Model
         'last_name',
         'id_number',
         'department',
+        'region',
         'front_image_path',
         'back_image_path'
     ];
+    
 }

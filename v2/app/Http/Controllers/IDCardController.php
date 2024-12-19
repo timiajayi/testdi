@@ -28,6 +28,7 @@ class IDCardController extends Controller
             'full_name' => 'required',
             'id_number' => 'nullable',
             'department' => 'nullable',
+            'region' => 'required',
             'user_image' => 'required|image',
             'qr_code' => 'nullable|image'
         ]);
@@ -39,7 +40,7 @@ class IDCardController extends Controller
             'front_image' => asset($result['front_image']),
             'back_image' => asset($result['back_image'])
         ]);
-    }    
+    } 
 
     public function gallery()
     {
