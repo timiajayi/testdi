@@ -44,6 +44,7 @@
             <div class="card-info">
                 <h3>First Name: {{ $card['name'] }}</h3>
                 <p>Last Name: {{ $card['last_name'] }}</p>
+                <p>Region: {{ $card['region'] ?? 'N/A' }}</p>
                 <p>Generated: {{ date('Y-m-d', strtotime($card['date'])) }}</p>
             </div>
             <img src="{{ asset($card['front_image']) }}" alt="Front">
