@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\IDCardController;
+use App\Http\Controllers\AdminController;
 
 // Set login as the default page
 Route::get('/', function () {
@@ -26,3 +27,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/gallery', [IDCardController::class, 'gallery'])->name('gallery');
     Route::delete('/cards/{id}', [IDCardController::class, 'destroy'])->name('cards.destroy');
 });
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::get('/users/create', [AdminController::class, 'create'])->name('admin.users.create');
+    Route::post('/users', [AdminController::class, 'store'])->name('admin.users.store');
+});
+
