@@ -256,9 +256,9 @@
                     document.getElementById('frontPreview').src = data.front_image;
                     document.getElementById('backPreview').src = data.back_image;
                     document.getElementById('downloadButtons').innerHTML = `
-                        <a href="${data.front_image}" download="${formData.get('full_name')}_${formData.get('region')}_front.jpg" class="download-btn">Download Front</a>
-                        <a href="${data.back_image}" download="${formData.get('full_name')}_${formData.get('region')}_back.jpg" class="download-btn">Download Back</a>
-                    `;
+                <a href="${data.front_image}" download class="download-btn">Download Front</a>
+                <a href="${data.back_image}" download class="download-btn">Download Back</a>
+            `;
                 }
             } catch (error) {
                 console.error('Error:', error);
