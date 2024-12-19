@@ -20,6 +20,18 @@
         <input type="text" id="nameSearch" placeholder="Search by First Name..." class="filter-input">
         <input type="text" id="idSearch" placeholder="Search by Last Name..." class="filter-input">
         <input type="date" id="dateSearch" class="filter-input">
+        <select id="regionSearch" class="filter-input">
+            <option value="">All Regions</option>
+            <option value="HQ">HQ</option>
+            <option value="IKEJA">IKEJA</option>
+            <option value="ILLORIN">ILLORIN</option>
+            <option value="IBADAN">IBADAN</option>
+            <option value="ABA">ABA</option>
+            <option value="ABUJA">ABUJA</option>
+            <option value="KADUNA">KADUNA</option>
+            <option value="KANO">KANO</option>
+            <option value="BENIN">BENIN</option>
+        </select>
     </div>
 
     <div class="gallery" id="cardGallery">
@@ -27,7 +39,8 @@
         <div class="card"
             data-name="{{ $card['name'] }}"
             data-lastname="{{ $card['last_name'] }}"
-            data-date="{{ date('Y-m-d', strtotime($card['date'])) }}">
+            data-date="{{ date('Y-m-d', strtotime($card['date'])) }}"
+            data-region="{{ $card['region'] }}">
             <div class="card-info">
                 <h3>First Name: {{ $card['name'] }}</h3>
                 <p>Last Name: {{ $card['last_name'] }}</p>
@@ -66,6 +79,7 @@
             const nameFilter = document.getElementById('nameSearch').value.toLowerCase();
             const lastNameFilter = document.getElementById('idSearch').value.toLowerCase();
             const dateFilter = document.getElementById('dateSearch').value;
+            const regionFilter = document.getElementById('regionSearch').value;
 
             const cards = document.querySelectorAll('.card');
 
@@ -73,19 +87,23 @@
                 const name = card.getAttribute('data-name').toLowerCase();
                 const lastName = card.getAttribute('data-lastname').toLowerCase();
                 const date = card.getAttribute('data-date');
+                const region = card.getAttribute('data-region');
 
                 const matchesName = name.includes(nameFilter);
                 const matchesLastName = lastName.includes(lastNameFilter);
                 const matchesDate = !dateFilter || date === dateFilter;
+                const matchesRegion = !regionFilter || region === regionFilter;
 
                 card.style.display =
-                    matchesName && matchesLastName && matchesDate ? 'block' : 'none';
+                    matchesName && matchesLastName && matchesDate && matchesRegion ? 'block' : 'none';
             });
         }
 
         document.getElementById('nameSearch').addEventListener('input', filterCards);
         document.getElementById('idSearch').addEventListener('input', filterCards);
         document.getElementById('dateSearch').addEventListener('input', filterCards);
+        document.getElementById('regionSearch').addEventListener('change', filterCards);
+
     </script>
     <script>
         function printCard(frontImage, backImage) {

@@ -14,15 +14,10 @@
         <h1>ID Card Generator</h1>
     </div>
     <div class="nav-links">
-    <a href="{{ route('gallery') }}" class="nav-link">View ID Card Gallery</a>
-    @if(auth()->user()->is_admin)
-        <a href="{{ route('admin.dashboard') }}" class="nav-link">Admin Dashboard</a>
-    @endif
-    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
-        @csrf
-        <button type="submit" class="nav-link" style="border: none; cursor: pointer;">Logout</button>
-    </form>
-</div>
+        @if(auth()->user()->is_admin)
+            <a href="{{ route('admin.dashboard') }}" class="nav-link">Admin Dashboard</a>
+        @endif
+    </div>
 
     <div class="form-container">
         <form id="idCardForm">
@@ -49,6 +44,21 @@
             <div class="form-group">
                 <label>Department (Optional)</label>
                 <input type="text" name="department" placeholder="Enter department">
+            </div>
+            <div class="form-group">
+                <label>Region</label>
+                <select name="region" required>
+                    <option value="">Select Region</option>
+                    <option value="HQ">HQ</option>
+                    <option value="IKEJA">IKEJA</option>
+                    <option value="ILLORIN">ILLORIN</option>
+                    <option value="IBADAN">IBADAN</option>
+                    <option value="ABA">ABA</option>
+                    <option value="ABUJA">ABUJA</option>
+                    <option value="KADUNA">KADUNA</option>
+                    <option value="KANO">KANO</option>
+                    <option value="BENIN">BENIN</option>
+                </select>
             </div>
 
             <div class="form-group">
