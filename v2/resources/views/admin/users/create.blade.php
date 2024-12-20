@@ -8,7 +8,7 @@
     <div class="admin-container">
         <div class="admin-header">
             <h1>Create New User</h1>
-            <a href="{{ route('admin.users') }}" class="btn">Back to Users</a>
+            <a href="{{ route('admin.users') }}" class="btn" style="color: white;">Back to Users</a>
         </div>
 
         @if($errors->any())
@@ -42,7 +42,7 @@
                 <label>Confirm Password</label>
                 <input type="password" name="password_confirmation" required>
             </div>
-            
+
             <div class="form-group">
                 <label>Role</label>
                 <select name="role" required>

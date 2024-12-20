@@ -8,8 +8,8 @@
     <div class="admin-container">
         <div class="admin-header">
             <h1>Manage Users</h1>
-            <a href="{{ route('admin.dashboard') }}" class="btn">Back to Dashboard</a>
-            <a href="{{ route('admin.users.create') }}" class="btn btn-primary">Create New User</a>
+            <a href="{{ route('admin.dashboard') }}" class="btn" style="color: white;">Back to Dashboard</a>
+            <a href="{{ route('admin.users.create') }}" class="btn btn-primary" style="color: white;">Create New User</a>
         </div>
 
         @if(session('success'))

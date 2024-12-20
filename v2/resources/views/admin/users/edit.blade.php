@@ -8,7 +8,7 @@
     <div class="admin-container">
         <div class="admin-header">
             <h1>Edit User</h1>
-            <a href="{{ route('admin.users') }}" class="btn">Back to Users</a>
+            <a href="{{ route('admin.users') }}" class="btn" style="color: white;">Back to Users</a>
         </div>
 
         @if($errors->any())
