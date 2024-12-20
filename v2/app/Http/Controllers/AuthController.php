@@ -196,6 +196,13 @@ class AuthController extends Controller
             Log::info('LDAP: Attempting service account bind with DN: ' . env('LDAP_USERNAME'));
             $serviceBind = @ldap_bind($ldap_conn, env('LDAP_USERNAME'), env('LDAP_PASSWORD'));
             
+            Log::info('LDAP Config:', [
+                'host' => env('LDAP_HOST'),
+                'port' => env('LDAP_PORT'),
+                'username' => env('LDAP_USERNAME'),
+                'base' => env('LDAP_USER_SEARCH_BASE')
+            ]);
+            
             if ($serviceBind) {
                 Log::info('LDAP: Service account bind successful for ' . env('LDAP_USERNAME'));
                 
