@@ -59,38 +59,38 @@ class AdminController extends Controller
         $user = User::findOrFail($id);
         return view('admin.users.edit', compact('user'));
     }
-
+    
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
-    
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
             'password' => 'nullable|string|min:8|confirmed',
+            'role' => 'required|in:staff,user,admin'
         ]);
-    
+
         if ($validator->fails()) {
-            return redirect()
-                ->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->withErrors($validator)->withInput();
         }
-    
+
         $userData = [
             'name' => $request->name,
             'email' => $request->email,
-            'is_admin' => $request->has('is_admin') ? true : false
+            'is_admin' => $request->role === 'admin',
+            'role' => $request->role
         ];
-    
+
         if ($request->filled('password')) {
             $userData['password'] = Hash::make($request->password);
         }
-    
+
         $user->update($userData);
-    
+
         return redirect()->route('admin.users')->with('success', 'User updated successfully');
-    }    
+    }
+        
 
     public function destroy($id)
     {

@@ -42,13 +42,16 @@
                 <label>Confirm Password</label>
                 <input type="password" name="password_confirmation" required>
             </div>
-
+            
             <div class="form-group">
-                <label>
-                    <input type="checkbox" name="is_admin" value="1" {{ old('is_admin') ? 'checked' : '' }}>
-                    Make Admin
-                </label>
+                <label>Role</label>
+                <select name="role" required>
+                    <option value="staff">Staff</option>
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
             </div>
+
 
             <button type="submit" class="btn btn-primary">Create User</button>
         </form>

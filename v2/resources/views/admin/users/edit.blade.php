@@ -46,10 +46,12 @@
             </div>
 
             <div class="form-group">
-                <label>
-                    <input type="checkbox" name="is_admin" value="1" {{ $user->is_admin ? 'checked' : '' }}>
-                    Admin Status
-                </label>
+                <label>Role</label>
+                <select name="role" required>
+                    <option value="staff" {{ $user->role === 'staff' ? 'selected' : '' }}>Staff</option>
+                    <option value="user" {{ $user->role === 'user' ? 'selected' : '' }}>User</option>
+                    <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
+                </select>
             </div>
 
             <button type="submit" class="btn btn-primary">Update User</button>

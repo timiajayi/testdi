@@ -22,9 +22,9 @@ class User extends Authenticatable
         'email',
         'password',
         'username',
-        'is_admin',
+        'is_admin',        
+        'role'
     ];
-    
 
     /**
      * The attributes that should be hidden for serialization.
@@ -45,4 +45,20 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+
+    public function isStaff()
+    {
+        return $this->role === 'staff';
+    }
+
+    public function isAdmin()
+    {
+        return $this->is_admin;
+    }
+
+    public function isNormalUser()
+    {
+        return !$this->isStaff() && !$this->isAdmin();
+    }
 }

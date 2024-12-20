@@ -32,7 +32,7 @@
                     <tr>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
-                        <td>{{ $user->is_admin ? 'Admin' : 'User' }}</td>
+                        <td>{{ ucfirst($user->role) }}</td>
                         <td>
                             <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-primary">Edit</a>
                             <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" style="display: inline;">

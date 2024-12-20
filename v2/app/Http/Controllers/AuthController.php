@@ -279,4 +279,12 @@ class AuthController extends Controller
         ]);
     }    
     
+    protected function authenticated(Request $request, $user)
+    {
+        if ($user->isStaff()) {
+            return redirect()->route('gallery');
+        }
+        return redirect()->intended('/home');
+    }
+    
 }

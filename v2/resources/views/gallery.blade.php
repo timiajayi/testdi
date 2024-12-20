@@ -49,12 +49,14 @@
             </div>
             <img src="{{ asset($card['front_image']) }}" alt="Front">
             <img src="{{ asset($card['back_image']) }}" alt="Back">
+            @if(!auth()->user()->isStaff())
             <div class="card-actions">
                 <a href="{{ asset($card['front_image']) }}" download class="download-btn" onclick="showMessage('Download started')">Download Front</a>
                 <a href="{{ asset($card['back_image']) }}" download class="download-btn" onclick="showMessage('Download started')">Download Back</a>
                 <button class="print-btn" onclick='printCard("{{ asset($card['front_image']) }}", "{{ asset($card['back_image']) }}")'>Print Card</button>
                 <button class="delete-btn" onclick="showDeleteModal('{{ basename($card['front_image']) }}', this)">Delete</button>
             </div>
+            @endif
         </div>
         @endforeach
     </div>
