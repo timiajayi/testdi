@@ -160,59 +160,100 @@ class AuthController extends Controller
         // Redirect to SAML IdP logout
         return redirect(Config::get('saml2.idp_sls_url'));
     }
+
     public function ldapLogin(Request $request)
     {
         $credentials = $request->validate([
             'username' => 'required',
             'password' => 'required'
         ]);
-
-        // Add this at the start of your ldapLogin method
-        $command = sprintf('sudo -u sevenup php -r \'$conn = ldap_connect("%s", %s);\'', env('LDAP_HOST'), env('LDAP_PORT'));
+    
+        Log::info('LDAP Login: Starting authentication process for user ' . $credentials['username']);
+    
         try {
-            Log::info('LDAP: Attempting connection to ' . env('LDAP_HOST'));
-            
+            // Connection attempt
+            Log::info('LDAP: Attempting connection to ' . env('LDAP_HOST') . ':' . env('LDAP_PORT'));
             $ldap_conn = ldap_connect(env('LDAP_HOST'), env('LDAP_PORT'));
-            ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-            ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
-            ldap_set_option($ldap_conn, LDAP_OPT_NETWORK_TIMEOUT, 10);
-
-            // First bind with service account
+            
+            if ($ldap_conn) {
+                Log::info('LDAP: Connection established successfully with ' . env('LDAP_HOST'));
+            } else {
+                Log::error('LDAP: Failed to establish connection with ' . env('LDAP_HOST'));
+                return back()->withErrors(['username' => 'Connection failed']);
+            }
+    
+            // Setting options with verification
+            Log::info('LDAP: Setting connection options');
+            $protocol = ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
+            $referrals = ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
+            $timeout = ldap_set_option($ldap_conn, LDAP_OPT_NETWORK_TIMEOUT, 10);
+            
+            Log::info('LDAP: Options set - Protocol v3: ' . ($protocol ? 'Yes' : 'No') . 
+                     ', Referrals: ' . ($referrals ? 'Yes' : 'No') . 
+                     ', Timeout: ' . ($timeout ? 'Yes' : 'No'));
+    
+            // Service account bind with detailed logging
+            Log::info('LDAP: Attempting service account bind with DN: ' . env('LDAP_USERNAME'));
             $serviceBind = @ldap_bind($ldap_conn, env('LDAP_USERNAME'), env('LDAP_PASSWORD'));
-            Log::info('LDAP: Service account bind result: ' . ($serviceBind ? 'Success' : 'Failed'));
-
+            
             if ($serviceBind) {
-                // Then search for and authenticate the user
-                $search = ldap_search($ldap_conn, env('LDAP_USER_SEARCH_BASE'), "(sAMAccountName={$credentials['username']})");
+                Log::info('LDAP: Service account bind successful for ' . env('LDAP_USERNAME'));
+                
+                // User search with detailed logging
+                $searchFilter = "(sAMAccountName={$credentials['username']})";
+                Log::info('LDAP: Searching for user with filter: ' . $searchFilter . 
+                         ' in base: ' . env('LDAP_USER_SEARCH_BASE'));
+                
+                $search = ldap_search($ldap_conn, env('LDAP_USER_SEARCH_BASE'), $searchFilter);
                 $entries = ldap_get_entries($ldap_conn, $search);
+                
+                Log::info('LDAP: Search completed. Found ' . $entries['count'] . ' entries');
                 
                 if ($entries['count'] > 0) {
                     $userDn = $entries[0]['dn'];
+                    Log::info('LDAP: Found user DN: ' . $userDn);
+                    Log::info('LDAP: Attempting user bind for: ' . $userDn);
+                    
                     $userBind = @ldap_bind($ldap_conn, $userDn, $credentials['password']);
-                    Log::info('LDAP: User bind result: ' . ($userBind ? 'Success' : 'Failed'));
-
+                    
                     if ($userBind) {
-                        $user = User::updateOrCreate(
-                            ['username' => $credentials['username']],
-                            [
-                                'name' => $entries[0]['displayname'][0] ?? $credentials['username'],
-                                'email' => $entries[0]['mail'][0] ?? '',
-                                'password' => Hash::make($credentials['password'])
-                            ]
-                        );
-
+                        Log::info('LDAP: User bind successful for DN: ' . $userDn);
+                        Log::info('LDAP: User attributes found - ' . 
+                                 'DisplayName: ' . ($entries[0]['displayname'][0] ?? 'Not set') . 
+                                 ', Email: ' . ($entries[0]['mail'][0] ?? 'Not set'));
+    
+                                 $user = User::updateOrCreate(
+                                    ['email' => $entries[0]['mail'][0] ?? ''],
+                                    [
+                                        'name' => $entries[0]['displayname'][0] ?? $credentials['username'],
+                                        'username' => $credentials['username'],
+                                        'password' => Hash::make($credentials['password'])
+                                    ]
+                                );                                
+    
                         Auth::login($user);
+                        Log::info('LDAP: Authentication successful for ' . $credentials['username']);
                         return redirect()->route('home');
+                    } else {
+                        Log::error('LDAP: User bind failed for DN: ' . $userDn . 
+                                 ' - Error: ' . ldap_error($ldap_conn));
                     }
+                } else {
+                    Log::warning('LDAP: No user found matching username: ' . $credentials['username']);
                 }
+            } else {
+                Log::error('LDAP: Service account bind failed - Error: ' . ldap_error($ldap_conn));
             }
         } catch (\Exception $e) {
             Log::error('LDAP Error: ' . $e->getMessage());
             Log::error('LDAP Error Trace: ' . $e->getTraceAsString());
+            Log::error('LDAP Last Error: ' . ldap_error($ldap_conn));
         }
-
+    
+        Log::warning('LDAP: Authentication process completed with failure for user ' . $credentials['username']);
         return back()->withErrors(['username' => 'Invalid credentials']);
     }
+    
     
     public function standardLogin(Request $request)
     {
