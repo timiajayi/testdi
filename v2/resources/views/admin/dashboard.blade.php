@@ -9,8 +9,8 @@
         <div class="admin-header">
             <h1>Admin Dashboard</h1>
             <nav>
-                <a href="{{ route('home') }}" class="btn">Generate ID Card</a>
-                <a href="{{ route('admin.users') }}" class="btn">Manage Users</a>
+                <a href="{{ route('home') }}" >Generate ID Card</a>
+                <a href="{{ route('admin.users') }}" >Manage Users</a>
                 <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                     @csrf
                     <button type="submit" class="btn">Logout</button>
