@@ -30,16 +30,18 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/generate-qr', [IDCardController::class, 'generateQR'])->name('generate.qr');
         Route::delete('/cards/{id}', [IDCardController::class, 'destroy'])->name('cards.destroy');
     });
+
+    Route::middleware(['admin'])->prefix('admin')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+        Route::get('/users/create', [AdminController::class, 'create'])->name('admin.users.create');
+        Route::post('/users', [AdminController::class, 'store'])->name('admin.users.store');
+        Route::get('/users/{id}/edit', [AdminController::class, 'edit'])->name('admin.users.edit');
+        Route::put('/users/{id}', [AdminController::class, 'update'])->name('admin.users.update');
+        Route::delete('/users/{id}', [AdminController::class, 'destroy'])->name('admin.users.destroy');
+    });
 });
 
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
-    Route::get('/users/create', [AdminController::class, 'create'])->name('admin.users.create');
-    Route::post('/users', [AdminController::class, 'store'])->name('admin.users.store');
-    Route::get('/users/{id}/edit', [AdminController::class, 'edit'])->name('admin.users.edit');
-    Route::put('/users/{id}', [AdminController::class, 'update'])->name('admin.users.update');
-    Route::delete('/users/{id}', [AdminController::class, 'destroy'])->name('admin.users.destroy');
-});
+
 
