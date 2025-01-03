@@ -5,7 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\IDCardController;
 use App\Http\Controllers\AdminController;
 
-// Set login as the default page
+// Default redirect to login
 Route::get('/', function () {
     return redirect('/login');
 });
@@ -14,16 +14,14 @@ Route::get('/', function () {
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/standard-login', [AuthController::class, 'standardLogin'])->name('standard.login');
 Route::post('/ldap/login', [AuthController::class, 'ldapLogin'])->name('ldap.login');
-Route::get('/saml/login', [AuthController::class, 'samlLogin'])->name('saml.login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-
-
-// Protected Routes
+// Protected Routes with Role-Based Access
 Route::middleware(['auth'])->group(function () {
+    // Gallery access for all authenticated users
     Route::get('/gallery', [IDCardController::class, 'gallery'])->name('gallery');
     
-    // Non-staff routes
+    // Routes for normal users (sevenup-zymera-user)
     Route::middleware(['not.staff'])->group(function () {
         Route::get('/home', [IDCardController::class, 'index'])->name('home');
         Route::post('/generate', [IDCardController::class, 'generate'])->name('generate');
@@ -31,6 +29,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/cards/{id}', [IDCardController::class, 'destroy'])->name('cards.destroy');
     });
 
+    // Admin routes (sevenup-zymera-admin)
     Route::middleware(['admin'])->prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
@@ -41,7 +40,3 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/users/{id}', [AdminController::class, 'destroy'])->name('admin.users.destroy');
     });
 });
-
-
-
-
