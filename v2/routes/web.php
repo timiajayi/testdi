@@ -21,7 +21,7 @@ Route::middleware(['auth'])->group(function () {
     // Gallery access for all authenticated users
     Route::get('/gallery', [IDCardController::class, 'gallery'])->name('gallery');
     
-    // Routes for normal users (sevenup-zymera-user)
+    // Routes for normal users and admins (sevenup-zymera-user and sevenup-zymera-admin)
     Route::middleware(['not.staff'])->group(function () {
         Route::get('/home', [IDCardController::class, 'index'])->name('home');
         Route::post('/generate', [IDCardController::class, 'generate'])->name('generate');

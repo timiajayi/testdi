@@ -9,9 +9,10 @@ class StaffAccess
 {
     public function handle(Request $request, Closure $next)
     {
-        if (auth()->user()->isStaff() || auth()->user()->isAdmin()) {
+        if (auth()->user()->isStaff() && !auth()->user()->isAdmin()) {
             return redirect()->route('gallery');
         }
         return $next($request);
     }
+    
 }
