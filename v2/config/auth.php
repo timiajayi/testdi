@@ -75,6 +75,11 @@ return [
             'model' => LdapRecord\Models\ActiveDirectory\User::class,
             'database' => [
                 'model' => App\Models\User::class,
+                'sync_passwords' => false,
+                'sync_attributes' => [
+                    'name' => 'displayname',
+                    'email' => 'mail',
+                ],
             ],
         ],
     ],

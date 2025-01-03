@@ -23,7 +23,8 @@ class User extends Authenticatable
         'password',
         'username',
         'is_admin',        
-        'role'
+        'role',
+        'ldap_groups'
     ];
 
     /**
@@ -44,21 +45,22 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'ldap_groups' => 'array'
     ];
 
 
     public function isStaff()
     {
-        return $this->role === 'staff';
+        return $this->role === 'staff' || in_array(config('ldap.groups.staff'), $this->ldap_groups ?? []);
     }
 
     public function isAdmin()
     {
-        return $this->is_admin;
+        return $this->is_admin || in_array(config('ldap.groups.admin'), $this->ldap_groups ?? []);
     }
 
     public function isNormalUser()
     {
-        return !$this->isStaff() && !$this->isAdmin();
+        return in_array(config('ldap.groups.user'), $this->ldap_groups ?? []);
     }
 }
