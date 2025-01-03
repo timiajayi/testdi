@@ -207,7 +207,20 @@ class AuthController extends Controller
                                 $groups[] = $entries[0]['memberof'][$i];
                             }
                         }
+                        
+                        // Check if user belongs to any Zymera groups
+                        $hasZymeraAccess = false;
+                        foreach ($groups as $group) {
+                            if (strpos($group, 'zymera') !== false) {
+                                $hasZymeraAccess = true;
+                                break;
+                            }
+                        }
     
+                        if (!$hasZymeraAccess) {
+                            return back()->withErrors(['username' => 'You do not have permission to access this platform']);
+                        }
+
                         // Determine role based on group membership
                         $role = 'user';
                         $is_admin = false;
